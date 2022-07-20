@@ -1,7 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import Engine from '../engine';
+import React from 'react';
 import { Canvas } from '@react-three/fiber';
-import Box from '../three/mesh/Box';
+import MainScene from '../three/MainScene';
 
 const Game: React.FC = () => {
   return (
@@ -18,10 +17,7 @@ const Game: React.FC = () => {
       }}
     >
       <Canvas>
-        <ambientLight />
-        <pointLight position={[10, 10, 10]} />
-        <Box position={[-1.2, 0, 0]} />
-        <Box position={[1.2, 0, 0]} />
+        <MainScene />
       </Canvas>
     </div>
   );

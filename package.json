@@ -6,6 +6,8 @@
     "@chakra-ui/react": "^2.2.1",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
+    "@react-three/cannon": "^6.3.0",
+    "@react-three/drei": "^9.13.2",
     "@react-three/fiber": "^8.0.26",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
@@ -57,6 +59,7 @@
   "devDependencies": {
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "prettier": "^2.7.1"
   }
 }

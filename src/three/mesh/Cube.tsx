@@ -1,16 +1,19 @@
-import * as THREE from 'three';
-import { useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useState } from 'react';
 import React from 'react';
+import { Triplet, useBox } from '@react-three/cannon';
+import * as THREE from 'three';
 
-const Box = (props: JSX.IntrinsicElements['mesh']) => {
-  const ref = useRef<THREE.Mesh>(null!);
+interface CubeProps {
+  position: Triplet;
+}
+
+const Cube = ({ position }: CubeProps) => {
+  const [ref] = useBox<THREE.Mesh>(() => ({ mass: 1, position }));
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
-  useFrame((state, delta) => (ref.current.rotation.x += hovered ? 0.03 : 0.01));
   return (
     <mesh
-      {...props}
+      position={position}
       ref={ref}
       scale={clicked ? 1.5 : 1}
       onClick={() => setClicked(!clicked)}
@@ -23,4 +26,4 @@ const Box = (props: JSX.IntrinsicElements['mesh']) => {
   );
 };
 
-export default Box;
+export default Cube;

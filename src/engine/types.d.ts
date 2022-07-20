@@ -1,1 +1,0 @@
-declare type PRNG = () => number;

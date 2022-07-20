@@ -7,6 +7,7 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:prettier/recommended',
   ],
+  plugins: [ 'unused-imports' ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     tsconfigRootDir: __dirname,
@@ -14,6 +15,12 @@ module.exports = {
   },
   rules: {
     // 'react/jsx-filename-extension': 0
+    '@typescript-eslint/ban-ts-comment': 'off',
+    "no-unused-vars": "off", // Use typescript-eslint version instead for --fix
+    "@typescript-eslint/no-unused-vars": "error",
+    "unused-imports/no-unused-imports": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+    "no-console": [ "error", { allow: [ "warn", "error" ]}]
   },
   settings: {
     'import/parsers': {
