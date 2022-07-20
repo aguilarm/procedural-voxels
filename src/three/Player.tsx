@@ -25,6 +25,7 @@ const Player = ({
   useEffect(() => {
     sphereApi.velocity.subscribe((v) => (velocity.current = v));
   }, [sphereApi.velocity]);
+  console.log(velocity.current, sphereApi.velocity);
   useFrame(() => {
     if (sphereRef.current) {
       camera.position.copy(sphereRef.current.position);
@@ -40,6 +41,7 @@ const Player = ({
       0,
       0,
     );
+
     const speed = BASE_SPEED * (activeControls.sprint ? SPRINT_MULTIPLIER : 1);
     direction
       .subVectors(frontVector, sideVector)
@@ -47,6 +49,15 @@ const Player = ({
       .multiplyScalar(speed)
       .applyEuler(camera.rotation);
     sphereApi.velocity.set(direction.x, velocity.current[1], direction.z);
+
+    if (
+      activeControls.jump &&
+      Math.abs(velocity.current[1]) <= 0.02 &&
+      velocity.current[1] > 0
+    ) {
+      sphereApi.velocity.set(velocity.current[0], 3, velocity.current[2]);
+    }
+
     sphereRef.current?.getWorldPosition(sphereRef.current.position);
   });
   return (
