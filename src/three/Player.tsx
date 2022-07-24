@@ -1,13 +1,63 @@
 import React, { useEffect, useRef } from 'react';
 import { useKeyboardControls } from '../hooks/useKeyboardControls';
-import { useFrame, useThree } from '@react-three/fiber';
-import { useSphere } from '@react-three/cannon';
+import { Camera, useFrame, useThree } from '@react-three/fiber';
+import { PublicApi, Triplet, useSphere } from '@react-three/cannon';
 import { Vector3 } from 'three';
 import { PointerLockControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 const BASE_SPEED = 5;
 const SPRINT_MULTIPLIER = 1.75;
+
+interface HandleFrameArgs {
+  sphereMesh: THREE.Mesh<THREE.BufferGeometry>;
+  sphereApi: PublicApi;
+  velocity: Triplet;
+  camera: Camera;
+  direction: Vector3;
+  frontVector: Vector3;
+  sideVector: Vector3;
+  activeControls: Record<string, boolean>;
+}
+
+function handleFrame({
+  sphereMesh,
+  sphereApi,
+  camera,
+  direction,
+  frontVector,
+  sideVector,
+  activeControls,
+  velocity,
+}: HandleFrameArgs) {
+  if (sphereMesh) {
+    camera.position.copy(sphereMesh.position);
+  }
+  frontVector.set(
+    0,
+    0,
+    Number(activeControls.moveBackward) - Number(activeControls.moveForward),
+  );
+  sideVector.set(
+    Number(activeControls.moveLeft) - Number(activeControls.moveRight),
+    0,
+    0,
+  );
+
+  const speed = BASE_SPEED * (activeControls.sprint ? SPRINT_MULTIPLIER : 1);
+  direction
+    .subVectors(frontVector, sideVector)
+    .normalize()
+    .multiplyScalar(speed)
+    .applyEuler(camera.rotation);
+  sphereApi.velocity.set(direction.x, velocity[1], direction.z);
+
+  if (activeControls.jump && Math.abs(velocity[1]) <= 0.02 && velocity[1] > 0) {
+    sphereApi.velocity.set(velocity[0], 3, velocity[2]);
+  }
+
+  sphereMesh.getWorldPosition(sphereMesh.position);
+}
 
 const Player = ({
   startPosition,
@@ -21,44 +71,27 @@ const Player = ({
     type: 'Dynamic',
     position: startPosition,
   }));
-  const velocity = useRef([0, 0, 0]);
+  const velocity = useRef<Triplet>([0, 0, 0]);
+  const direction = useRef(new Vector3());
+  const frontVector = useRef(new Vector3());
+  const sideVector = useRef(new Vector3());
   useEffect(() => {
     sphereApi.velocity.subscribe((v) => (velocity.current = v));
   }, [sphereApi.velocity]);
-  console.log(velocity.current, sphereApi.velocity);
   useFrame(() => {
-    if (sphereRef.current) {
-      camera.position.copy(sphereRef.current.position);
+    if (!sphereRef.current) {
+      return;
     }
-    const direction = new Vector3();
-    const frontVector = new Vector3(
-      0,
-      0,
-      Number(activeControls.moveBackward) - Number(activeControls.moveForward),
-    );
-    const sideVector = new Vector3(
-      Number(activeControls.moveLeft) - Number(activeControls.moveRight),
-      0,
-      0,
-    );
-
-    const speed = BASE_SPEED * (activeControls.sprint ? SPRINT_MULTIPLIER : 1);
-    direction
-      .subVectors(frontVector, sideVector)
-      .normalize()
-      .multiplyScalar(speed)
-      .applyEuler(camera.rotation);
-    sphereApi.velocity.set(direction.x, velocity.current[1], direction.z);
-
-    if (
-      activeControls.jump &&
-      Math.abs(velocity.current[1]) <= 0.02 &&
-      velocity.current[1] > 0
-    ) {
-      sphereApi.velocity.set(velocity.current[0], 3, velocity.current[2]);
-    }
-
-    sphereRef.current?.getWorldPosition(sphereRef.current.position);
+    handleFrame({
+      sphereMesh: sphereRef.current,
+      sphereApi,
+      camera,
+      direction: direction.current,
+      frontVector: frontVector.current,
+      sideVector: sideVector.current,
+      activeControls,
+      velocity: velocity.current,
+    });
   });
   return (
     <>
