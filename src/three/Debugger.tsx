@@ -1,6 +1,6 @@
 import { Stats } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 const Debugger = () => {
   const { gl } = useThree();
