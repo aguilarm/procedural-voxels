@@ -1,13 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import React, { MutableRefObject, useEffect, useRef, useState } from 'react';
 import { useKeyboardControls } from '../hooks/useKeyboardControls';
 import { Camera, useFrame, useThree } from '@react-three/fiber';
 import { PublicApi, Triplet, useSphere } from '@react-three/cannon';
 import { Vector3 } from 'three';
-import { PointerLockControls } from '@react-three/drei';
+import { OrbitControls, PointerLockControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 const BASE_SPEED = 5;
 const SPRINT_MULTIPLIER = 1.75;
+const JUMP_MULTIPLIER = 7;
+const HEIGHT_DIFF = 1;
+const RADIUS = 0.45;
 
 interface HandleFrameArgs {
   sphereMesh: THREE.Mesh<THREE.BufferGeometry>;
@@ -18,6 +21,8 @@ interface HandleFrameArgs {
   frontVector: Vector3;
   sideVector: Vector3;
   activeControls: Record<string, boolean>;
+  syncCamera: boolean;
+  lastYPosRef: MutableRefObject<number | null>;
 }
 
 function handleFrame({
@@ -25,13 +30,24 @@ function handleFrame({
   sphereApi,
   camera,
   direction,
+  lastYPosRef,
   frontVector,
   sideVector,
   activeControls,
   velocity,
+  syncCamera,
 }: HandleFrameArgs) {
-  if (sphereMesh) {
-    camera.position.copy(sphereMesh.position);
+  if (sphereMesh && !syncCamera) {
+    const currentY = sphereMesh.position.y;
+    const cameraPos = sphereMesh.position.clone();
+    if (
+      lastYPosRef.current === null ||
+      currentY !== lastYPosRef.current - HEIGHT_DIFF
+    ) {
+      lastYPosRef.current = currentY + HEIGHT_DIFF;
+    }
+    cameraPos.setY(lastYPosRef.current);
+    camera.position.copy(cameraPos);
   }
   frontVector.set(
     0,
@@ -53,21 +69,19 @@ function handleFrame({
   sphereApi.velocity.set(direction.x, velocity[1], direction.z);
 
   if (activeControls.jump && Math.abs(velocity[1]) <= 0.02 && velocity[1] > 0) {
-    sphereApi.velocity.set(velocity[0], 3, velocity[2]);
+    sphereApi.velocity.set(velocity[0], JUMP_MULTIPLIER, velocity[2]);
   }
 
   sphereMesh.getWorldPosition(sphereMesh.position);
 }
 
-const Player = ({
-  startPosition,
-}: {
-  startPosition: [x: number, y: number, z: number];
-}) => {
+const Player = ({ startPosition }: { startPosition: Triplet }) => {
   const { camera } = useThree();
+  const [isThirdPerson, setIsThirdPerson] = useState(false);
   const activeControls = useKeyboardControls();
   const [sphereRef, sphereApi] = useSphere<THREE.Mesh>(() => ({
     mass: 1,
+    args: [RADIUS],
     type: 'Dynamic',
     position: startPosition,
   }));
@@ -75,9 +89,22 @@ const Player = ({
   const direction = useRef(new Vector3());
   const frontVector = useRef(new Vector3());
   const sideVector = useRef(new Vector3());
+  const lastYPos = useRef<number | null>(null);
   useEffect(() => {
     sphereApi.velocity.subscribe((v) => (velocity.current = v));
   }, [sphereApi.velocity]);
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.code === 'KeyT') {
+        setIsThirdPerson((prev) => !prev);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
   useFrame(() => {
     if (!sphereRef.current) {
       return;
@@ -90,13 +117,18 @@ const Player = ({
       frontVector: frontVector.current,
       sideVector: sideVector.current,
       activeControls,
+      lastYPosRef: lastYPos,
       velocity: velocity.current,
+      syncCamera: isThirdPerson,
     });
   });
   return (
     <>
-      <PointerLockControls />
-      <mesh ref={sphereRef} />
+      {isThirdPerson ? <OrbitControls /> : <PointerLockControls />}
+      <mesh ref={sphereRef}>
+        <meshStandardMaterial wireframe={true} color={'black'} />
+        <sphereBufferGeometry args={[RADIUS]} />
+      </mesh>
     </>
   );
 };
