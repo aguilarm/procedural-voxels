@@ -1,20 +1,34 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import React from 'react';
 import { Triplet, useBox } from '@react-three/cannon';
 import * as THREE from 'three';
 import { ThreeEvent } from '@react-three/fiber';
+import { useTexture } from '@react-three/drei';
 
 interface CubeProps {
   position: Triplet;
+  model?: THREE.BufferGeometry;
 }
 
-const Cube = ({ position }: CubeProps) => {
+const Cube = ({ position, model }: CubeProps) => {
   const [boxRef] = useBox<THREE.Mesh>(() => ({
     mass: 1,
     position,
     type: 'Static',
   }));
-  const boxGeometryRef = useRef<THREE.BoxBufferGeometry>(null);
+  const textures = useTexture([
+    '/textures/dirt.png',
+    '/textures/oak_planks.png',
+    '/textures/gravel.png',
+    '/textures/mossy_cobblestone_slab_double.png',
+    '/textures/stone.png',
+  ]);
+  // TODO - Pass texture as a prop instead. Just want some variety for now.
+  const textureIndex = useMemo(
+    () => Math.floor(Math.random() * (textures.length - 1)),
+    [textures],
+  );
+  const renderModel = useMemo(() => model || new THREE.BoxGeometry(), [model]);
   const [hoveredFaceIndex, setHoveredFaceIndex] = useState<null | number>(null);
   const [clicked, setClicked] = useState(false);
   const handleHover = useCallback(
@@ -46,12 +60,14 @@ const Cube = ({ position }: CubeProps) => {
       return (
         <meshStandardMaterial
           key={index}
+          map={textures[textureIndex]}
           attach={`material-${index}`}
-          color={hovered ? 'hotpink' : 'orange'}
+          color={hovered ? 'darkgrey' : 'white'}
         />
       );
     });
   }, [hoveredFaceIndex]);
+
   return (
     <>
       <mesh
@@ -63,24 +79,10 @@ const Cube = ({ position }: CubeProps) => {
         onClick={handleClick}
         onPointerMove={handleHover}
         onPointerLeave={handlePointerLeave}
+        geometry={renderModel}
       >
-        <boxBufferGeometry
-          ref={boxGeometryRef}
-          attach={'geometry'}
-          args={[1, 1, 1]}
-        />
         {faceMaterials}
       </mesh>
-      {boxGeometryRef.current && hoveredFaceIndex && (
-        <lineSegments position={position} scale={1.02}>
-          <edgesGeometry attach={'geometry'} args={[boxGeometryRef.current]} />
-          <lineBasicMaterial
-            color={'black'}
-            linewidth={10}
-            // attach={`material-${hoveredFaceIndex}`}
-          />
-        </lineSegments>
-      )}
     </>
   );
 };

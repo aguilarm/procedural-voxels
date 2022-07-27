@@ -126,7 +126,7 @@ const Player = ({ startPosition }: { startPosition: Triplet }) => {
     <>
       {isThirdPerson ? <OrbitControls /> : <PointerLockControls />}
       <mesh ref={sphereRef}>
-        <meshStandardMaterial wireframe={true} color={'black'} />
+        <meshPhongMaterial transparent opacity={0} />
         <sphereBufferGeometry args={[RADIUS, 6, 6]} />
       </mesh>
     </>
