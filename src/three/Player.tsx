@@ -8,9 +8,9 @@ import * as THREE from 'three';
 
 const BASE_SPEED = 5;
 const SPRINT_MULTIPLIER = 1.75;
-const JUMP_MULTIPLIER = 7;
-const HEIGHT_DIFF = 1;
-const RADIUS = 0.45;
+const JUMP_MULTIPLIER = 7.15;
+const HEIGHT_DIFF = 1.4;
+const RADIUS = 0.46;
 
 interface HandleFrameArgs {
   sphereMesh: THREE.Mesh<THREE.BufferGeometry>;
@@ -127,7 +127,7 @@ const Player = ({ startPosition }: { startPosition: Triplet }) => {
       {isThirdPerson ? <OrbitControls /> : <PointerLockControls />}
       <mesh ref={sphereRef}>
         <meshStandardMaterial wireframe={true} color={'black'} />
-        <sphereBufferGeometry args={[RADIUS]} />
+        <sphereBufferGeometry args={[RADIUS, 6, 6]} />
       </mesh>
     </>
   );
