@@ -7,7 +7,7 @@ import { useTexture } from '@react-three/drei';
 
 interface CubeProps {
   position: Triplet;
-  model?: THREE.BufferGeometry;
+  model: THREE.BufferGeometry;
 }
 
 const Cube = ({ position, model }: CubeProps) => {
@@ -62,6 +62,7 @@ const Cube = ({ position, model }: CubeProps) => {
           key={index}
           map={textures[textureIndex]}
           attach={`material-${index}`}
+          side={THREE.FrontSide}
           color={hovered ? 'darkgrey' : 'white'}
         />
       );
