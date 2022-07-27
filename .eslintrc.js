@@ -20,7 +20,7 @@ module.exports = {
     "@typescript-eslint/no-unused-vars": "error",
     "unused-imports/no-unused-imports": "error",
     "@typescript-eslint/no-explicit-any": "error",
-    "no-console": [ "error", { allow: [ "warn", "error" ]}]
+    "no-console": [ "error", { allow: [ "warn", "error", "debug" ]}]
   },
   settings: {
     'import/parsers': {
