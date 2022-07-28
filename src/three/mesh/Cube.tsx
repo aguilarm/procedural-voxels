@@ -39,7 +39,7 @@ const Cube = ({ position, model }: CubeProps) => {
       if (hoveredFaceIndex === newFace) return;
       setHoveredFaceIndex(Math.floor(event.faceIndex / 2));
     },
-    [setHoveredFaceIndex],
+    [setHoveredFaceIndex, hoveredFaceIndex],
   );
   const handleClick = useCallback(
     (event: ThreeEvent<MouseEvent>) => {
@@ -49,7 +49,7 @@ const Cube = ({ position, model }: CubeProps) => {
       const newScale = Array(3).fill(clicked ? 0.95 : 1) as Triplet;
       boxRef.current.scale.set(...newScale);
     },
-    [setClicked, boxRef],
+    [setClicked, boxRef, clicked],
   );
   const handlePointerLeave = useCallback(() => {
     setHoveredFaceIndex(null);
@@ -67,7 +67,7 @@ const Cube = ({ position, model }: CubeProps) => {
         />
       );
     });
-  }, [hoveredFaceIndex]);
+  }, [hoveredFaceIndex, textureIndex, textures]);
 
   return (
     <>

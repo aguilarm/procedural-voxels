@@ -1,12 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Center, VStack } from '@chakra-ui/react';
+import { Button, Center, Heading, VStack } from '@chakra-ui/react';
 
 const TitleScreen = () => (
-  <Center h={'100vh'} w={'100vw'}>
+  <Center h={'75vh'} w={'100vw'}>
     <VStack>
-      <h1>Blocks</h1>
-      <Link to={'/game'}>Start</Link>
+      <Heading>Vaiotl</Heading>
+      <Button>
+        <Link to={'/game'}>Start</Link>
+      </Button>
     </VStack>
   </Center>
 );

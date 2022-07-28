@@ -1,6 +1,7 @@
 import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import MainScene from '../three/MainScene';
+import Debug from './Debug/Debug';
 
 const Game: React.FC = () => {
   return (
@@ -16,6 +17,7 @@ const Game: React.FC = () => {
         overflow: 'hidden',
       }}
     >
+      <Debug />
       <Canvas>
         <MainScene />
       </Canvas>
