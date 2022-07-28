@@ -3,22 +3,25 @@ import React, { useEffect } from 'react';
 import useDebugStore from '../Game/Debug/useDebugStore';
 
 const Debugger = () => {
-  const { gl } = useThree();
-  const updateRenderState = useDebugStore((store) => store.updateRender);
+  const { gl, camera } = useThree();
+  const setRenderState = useDebugStore((store) => store.setRender);
+  const facingVector = useDebugStore((store) => store.facing.vector);
+  const setFacingVector = useDebugStore((store) => store.setFacingVector);
+  const setPlayerPos = useDebugStore((store) => store.setPlayerPos);
   useEffect(() => {
-    const updateDebug = setInterval(
-      () =>
-        updateRenderState({
-          forFrame: gl.info.render.frame,
-          triangles: gl.info.render.triangles,
-          geometries: gl.info.memory.geometries,
-          textures: gl.info.memory.textures,
-          renderCalls: gl.info.render.calls,
-        }),
-      1000,
-    );
+    const updateDebug = setInterval(() => {
+      setRenderState({
+        forFrame: gl.info.render.frame,
+        triangles: gl.info.render.triangles,
+        geometries: gl.info.memory.geometries,
+        textures: gl.info.memory.textures,
+        renderCalls: gl.info.render.calls,
+      });
+      setFacingVector(camera.getWorldDirection(facingVector));
+      setPlayerPos(camera.position);
+    }, 300);
     return () => clearInterval(updateDebug);
-  }, [gl, updateRenderState]);
+  }, [gl, setRenderState, setFacingVector, facingVector, camera, setPlayerPos]);
   return <></>;
 };
 

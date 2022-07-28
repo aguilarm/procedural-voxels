@@ -5,12 +5,14 @@ import * as THREE from 'three';
 import { ThreeEvent } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 
+const sharedGeo = new THREE.BoxBufferGeometry();
+
 interface CubeProps {
   position: Triplet;
-  model: THREE.BufferGeometry;
+  model?: THREE.BufferGeometry;
 }
 
-const Cube = ({ position, model }: CubeProps) => {
+const Block = ({ position, model }: CubeProps) => {
   const [boxRef] = useBox<THREE.Mesh>(() => ({
     mass: 1,
     position,
@@ -28,7 +30,7 @@ const Cube = ({ position, model }: CubeProps) => {
     () => Math.floor(Math.random() * (textures.length - 1)),
     [textures],
   );
-  const renderModel = useMemo(() => model || new THREE.BoxGeometry(), [model]);
+  const renderModel = useMemo(() => model || sharedGeo, [model]);
   const [hoveredFaceIndex, setHoveredFaceIndex] = useState<null | number>(null);
   const [clicked, setClicked] = useState(false);
   const handleHover = useCallback(
@@ -88,4 +90,4 @@ const Cube = ({ position, model }: CubeProps) => {
   );
 };
 
-export default Cube;
+export default Block;
